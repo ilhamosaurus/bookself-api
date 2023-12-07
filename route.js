@@ -1,12 +1,7 @@
 const express = require('express');
+const { addBookHandler } = require('./handler');
 const router = express.Router();
 
-const routes = [
-    {
-      path: '/books',
-			method: 'post',
+router.post('/', addBookHandler);
 
-    }
-];
-
-module.exports = routes;
+module.exports = router;
