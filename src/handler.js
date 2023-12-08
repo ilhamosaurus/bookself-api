@@ -16,7 +16,9 @@ const addBookHandler = (req, res) => {
 		return res.send({ message: 'Mohon masukan jumlah halaman yang benar' });
 	}
 
-	books.query((`INSERT INTO books(title, year, summary, publisher, page_count, page_read, reading, finished, inserted_at, updated_at) VALUES('${title}', '${year}', '${summary}', '${publisher}', ${pageCount}, ${pageRead}, ${reading}, ${finished}, '${inseretedAt}', '${updatedAt}') RETURNING *`), (err, result) => {
+	books.query((`INSERT INTO books(title, year, summary, publisher, page_count, page_read, reading, finished, inserted_at, updated_at) 
+		VALUES('${title}', '${year}', '${summary}', '${publisher}', ${pageCount}, ${pageRead}, ${reading}, ${finished}, '${inseretedAt}', '${updatedAt}') RETURNING *`), 
+		(err, result) => {
 		var newBook = result.rows[0];
 
 		if (err) {
@@ -32,4 +34,26 @@ const addBookHandler = (req, res) => {
 	});
 }
 
-module.exports = { addBookHandler };
+const getAllBookHandler = (req, res) => {
+	books.query((`SELECT * FROM books`), (err, result) => {
+		const getAllBooks = result.rows;
+
+		if (!getAllBooks) {
+			res.status(404);
+			res.send({ message: 'Tidak ada buku tersedia.'});
+		}
+
+		if (err) {
+			res.status(401).json(err.message);
+		}
+		else {
+			res.status(200);
+			res.send({
+				message: 'Daftar buku tersedia:',
+				result: getAllBooks
+			})
+		}
+	})
+}
+
+module.exports = { addBookHandler, getAllBookHandler };
