@@ -53,7 +53,31 @@ const getAllBookHandler = (req, res) => {
 				result: getAllBooks
 			})
 		}
-	})
+	});
 }
 
-module.exports = { addBookHandler, getAllBookHandler };
+const getBookByIdHandler = (req, res) => {
+	const bookId = req.params.id;
+
+	books.query((`SELECT * FROM books WHERE id = ${bookId}`), (err, result) => {
+		const bookById = result.rows;
+
+		if (!bookById) {
+			res.status(404);
+			res.send({ message: 'Buku tidak ditemukan.' });
+		}
+
+		if (err) {
+			res.status(401).json(err.message);
+		}
+		else {
+			res.status(200);
+			res.send({
+				message: 'Buku ditemukan:',
+				result: bookById
+			});
+		}
+	});
+}
+
+module.exports = { addBookHandler, getAllBookHandler, getBookByIdHandler };
