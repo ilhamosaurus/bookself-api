@@ -1,4 +1,3 @@
-const { Pool } = require('pg');
 const books = require('./books');
 
 const addBookHandler = (req, res) => {
