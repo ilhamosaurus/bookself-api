@@ -1,3 +1,4 @@
+const { Pool } = require('pg');
 const books = require('./books');
 
 const addBookHandler = (req, res) => {
@@ -80,4 +81,45 @@ const getBookByIdHandler = (req, res) => {
 	});
 }
 
-module.exports = { addBookHandler, getAllBookHandler, getBookByIdHandler };
+const editBookByIdHandler = async (req, res) => {
+	const bookId = req.params.id;
+	const { title, year, summary, publisher, pageCount, pageRead, reading } = req.body;
+	const finished = pageRead === pageCount;
+	const updatedAt = new Date().toISOString();
+
+	try {
+			if (!title) {
+					res.status(400).send({ message: 'Gagal memperbarui buku. Title tidak boleh kosong.' });
+					return;
+			}
+
+			if (pageRead > pageCount) {
+					res.status(400).send({ message: 'Gagal memperbarui buku. pageRead tidak boleh lebih besar dari pageCount.' });
+					return;
+			}
+
+			const result = await books.query(`
+					UPDATE books
+					SET title = $1, year = $2, summary = $3, publisher = $4, page_count = $5, page_read = $6, reading = $7, finished = $8, updated_at = $9
+					WHERE id = $10
+					RETURNING *
+			`, [title, year, summary, publisher, pageCount, pageRead, reading, finished, updatedAt, bookId]);
+
+			const updatedBook = result.rows;
+
+			if (updatedBook.length === 0) {
+					res.status(404).send({ message: 'Buku tidak ditemukan.' });
+			} else {
+					res.status(200).send({
+							message: 'Buku berhasil diperbarui:',
+							result: updatedBook
+					});
+			}
+	} catch (err) {
+			console.error(err);
+			res.status(500).send({ message: 'Internal Server Error' });
+	}
+};
+
+
+module.exports = { addBookHandler, getAllBookHandler, getBookByIdHandler, editBookByIdHandler };
