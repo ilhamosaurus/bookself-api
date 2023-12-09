@@ -121,5 +121,35 @@ const editBookByIdHandler = async (req, res) => {
 	}
 };
 
+const deleteBookByIdHandler = async (req, res) => {
+	const { bookId } = req.params.id;
 
-module.exports = { addBookHandler, getAllBookHandler, getBookByIdHandler, editBookByIdHandler };
+	try {
+		const result = await books.query(`
+		DELETE FROM books
+		 WHERE id = $1
+		 RETURNING *
+		 `, [bookId]);
+
+		const deletedBook = result.rows;
+
+		if (!deletedBook) {
+			res.status(404).send({ 
+				message: 'Buku tidak ditmukan.' 
+			});
+		}
+		else {
+			res.status(200).send({
+				message: 'Buku berhasil dihapus.'
+			});
+		}
+	}
+	catch (err) {
+		console.error(err);
+		res.status(500).send({ 
+			message: 'Internal Server Error' 
+		});
+	}
+};
+
+module.exports = { addBookHandler, getAllBookHandler, getBookByIdHandler, editBookByIdHandler, deleteBookByIdHandler };
